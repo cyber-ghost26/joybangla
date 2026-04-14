@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>জয় বাংলা · ফটোকার্ড মেকার</title>
+    <!-- Google Font for better Bengali rendering -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        body {
+            background: #1a1e2b;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Hind Siliguri', sans-serif;
+            padding: 16px;
+            margin: 0;
+        }
+
+        .websuit-container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(20, 25, 35, 0.9);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 24px 24px 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 0 2px #1f3a2f inset;
+            border: 1px solid #4c7a5e;
+        }
+
+        h1 {
+            text-align: center;
+            color: #f5e9d8;
+            font-weight: 600;
+            letter-spacing: 2px;
+            font-size: 2.4rem;
+            margin-top: 4px;
+            margin-bottom: 16px;
+            text-shadow: 3px 3px 0 #1e3a2a;
+            word-break: keep-all;
+        }
+        h1 span {
+            background: linear-gradient(135deg, #ff4d4d, #b30000);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: none;
+            margin: 0 6px;
+        }
+
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            background: #0f151c;
+            border-radius: 28px;
+            padding: 12px;
+            box-shadow: inset 0 0 8px #00000055, 0 10px 10px -5px #00000080;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 0 0 3px #2e5a3e, 0 12px 25px #000000;
+            transition: box-shadow 0.2s;
+            background: #222; /* fallback */
+        }
+
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 16px 20px;
+            margin: 18px 0 10px;
+        }
+
+        .upload-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #273b2e;
+            padding: 6px 18px 6px 12px;
+            border-radius: 60px;
+            box-shadow: inset 0 2px 5px #1e2b1e, 0 4px 6px #00000040;
+        }
+
+        .upload-label {
+            color: #f2ffe6;
+            font-weight: 600;
+            font-size: 1rem;
+            background: #1f4a2c;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.15s;
+            border: 1px solid #7fb07f;
+            box-shadow: 0 2px 0 #0e1e0e;
+            user-select: none;
+        }
+        .upload-label:hover {
+            background: #2e6e3e;
+            border-color: #b3e0b3;
+        }
+        .upload-label:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-name {
+            color: #c0e0c0;
+            max-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9rem;
+        }
+
+        .resize-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #1d2e22;
+            padding: 5px 18px;
+            border-radius: 50px;
+            box-shadow: inset 0 1px 4px #0f170f;
+        }
+        .resize-box label {
+            color: #e2f2d9;
+            font-weight: 500;
+        }
+        #sizeSlider {
+            width: 180px;
+            accent-color: #c0392b;
+        }
+        #sizeValue {
+            color: white;
+            background: #1f3b2c;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-weight: 700;
+            min-width: 70px;
+            text-align: center;
+            border: 1px solid #6f9e7c;
+        }
+
+        .download-btn {
+            background: linear-gradient(145deg, #b84a3a, #922b21);
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 12px 36px;
+            border-radius: 48px;
+            cursor: pointer;
+            box-shadow: 0 8px 0 #4f1e16, 0 4px 12px black;
+            transition: all 0.08s ease;
+            border: 1px solid #e07a6e;
+            letter-spacing: 1px;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+        .download-btn:hover {
+            background: linear-gradient(145deg, #c95e4c, #a43326);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 0 #4f1e16, 0 6px 14px black;
+        }
+        .download-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 4px 0 #4f1e16, 0 3px 8px black;
+        }
+
+        .hint {
+            text-align: center;
+            color: #bdd6bd;
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 18px;
+            color: #6f9176;
+        }
+    </style>
+</head>
+<body>
+<div class="websuit-container">
+    <h1>জয় বাংলা ফটোকার্ড</h1>
+    
+    <div class="canvas-wrapper">
+        <canvas id="photoCardCanvas" width="600" height="600"></canvas>
+    </div>
+
+    <div class="control-panel">
+        <div class="upload-area">
+            <label for="fileInput" class="upload-label">📁 ছবি বাছাই</label>
+            <input type="file" id="fileInput" accept="image/png, image/jpeg, image/webp, image/jpg">
+            <span class="file-name" id="fileNameDisplay">কোনো ফাইল নয়</span>
+        </div>
+
+        <div class="resize-box">
+            <label>📐 রিসাইজ</label>
+            <input type="range" id="sizeSlider" min="400" max="1200" value="600" step="10">
+            <span id="sizeValue">600 px</span>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin: 10px 0 5px;">
+        <button class="download-btn" id="downloadBtn">⬇️ ডাউনলোড কার্ড</button>
+    </div>
+    
+    <div class="hint" hidden>
+        ⚡ সবুজ-লাল ব্যাকগ্রাউন্ড · গোল ছবি · "জয় বাংলা" লেখা
+    </div>
+    <footer hidden>⚙️ সাইজ স্লাইড করলে রিয়েল-টাইম আপডেট · ডাউনলোড PNG</footer>
+</div>
+
+<script>
+    (function() {
+        "use strict";
+
+        // ----- DOM elements -----
+        const canvas = document.getElementById('photoCardCanvas');
+        const ctx = canvas.getContext('2d');
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const sizeSlider = document.getElementById('sizeSlider');
+        const sizeValue = document.getElementById('sizeValue');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // ----- state -----
+        let userImage = null;           // loaded HTMLImageElement
+        let currentSize = 600;          // square canvas size
+        const defaultImage = null;      // we draw a placeholder if no image
+
+        // We'll also load a default dummy image (dataURL) in case user hasn't uploaded
+        function createPlaceholderImage() {
+            // A simple SVG with a camera icon — to show round circle even without upload
+            const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" fill="#3a5a40" stroke="#dad7cd" stroke-width="4"/>
+                <circle cx="50" cy="45" r="16" fill="#a3b18a" />
+                <circle cx="55" cy="40" r="5" fill="#344e41" />
+                <path d="M30 70 L70 70 L75 55 L25 55 Z" fill="#588157" opacity="0.8" />
+                <rect x="20" y="75" width="60" height="8" fill="#2f3e2e" />
+            </svg>`;
+            const blob = new Blob([svg], { type: 'image/svg+xml' });
+            return URL.createObjectURL(blob);
+        }
+        let placeholderURL = createPlaceholderImage();
+        let placeholderImg = new Image();
+        placeholderImg.src = placeholderURL;
+        // wait for placeholder to load before first draw
+        placeholderImg.onload = () => {
+            if (!userImage) {
+                // draw with placeholder
+                drawCard();
+            }
+        };
+
+        // ----- helper: draw the complete photocard -----
+        function drawCard() {
+            const size = currentSize;
+            canvas.width = size;
+            canvas.height = size;
+            
+            // 1. BACKGROUND: green & red (diagonal split, left/right feel)
+            //    Use linear gradient from top-left (red) to bottom-right (green)
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#c1121f');   // deep red
+            gradient.addColorStop(0.45, '#a4161a');
+            gradient.addColorStop(0.55, '#2d6a4f');
+            gradient.addColorStop(1, '#1b4332');    // rich green
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // Optional: add subtle pattern or stripes? Not needed, gradient gives "green and red"
+
+            // 2. Draw a semi-transparent overlay to make text readable (optional)
+            //    but we keep it clean.
+
+            // 3. CIRCLE PHOTO (round frame)
+            const centerX = size / 2;
+            const centerY = size * 0.42;  // a bit upper to leave space for text
+            const radius = size * 0.28;    // proportional to size
+            
+            // Draw white border glow before image
+            ctx.save();
+            ctx.shadowColor = '#f1e9db';
+            ctx.shadowBlur = 16;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius + 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff20';
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.restore();
+
+            // Draw outer ring (green-red vibe)
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius + 5, 0, Math.PI * 2);
+            ctx.strokeStyle = '#f5e6d3';
+            ctx.lineWidth = size * 0.012;
+            ctx.stroke();
+            ctx.shadowColor = '#220901';
+            ctx.shadowBlur = 12;
+            ctx.strokeStyle = '#c77d1f';
+            ctx.lineWidth = size * 0.008;
+            ctx.stroke();
+            ctx.restore();
+
+            // Draw the image (clipped to circle)
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+
+            // Draw the image (cover fit: center crop)
+            if (userImage && userImage.complete && userImage.naturalWidth > 0) {
+                // Calculate cover dimensions
+                const imgWidth = userImage.width;
+                const imgHeight = userImage.height;
+                const targetSize = radius * 2;
+                
+                let sourceX, sourceY, sourceWidth, sourceHeight;
+                
+                if (imgWidth > imgHeight) {
+                    // landscape
+                    sourceHeight = imgHeight;
+                    sourceWidth = imgHeight;
+                    sourceX = (imgWidth - imgHeight) / 2;
+                    sourceY = 0;
+                } else {
+                    // portrait or square
+                    sourceWidth = imgWidth;
+                    sourceHeight = imgWidth;
+                    sourceX = 0;
+                    sourceY = (imgHeight - imgWidth) / 2;
+                }
+                
+                ctx.drawImage(
+                    userImage,
+                    sourceX, sourceY, sourceWidth, sourceHeight,
+                    centerX - radius, centerY - radius, targetSize, targetSize
+                );
+            } else {
+                // Use placeholder image
+                if (placeholderImg.complete && placeholderImg.naturalWidth > 0) {
+                    const pH = placeholderImg.height;
+                    const pW = placeholderImg.width;
+                    let sX, sY, sW, sH;
+                    if (pW > pH) {
+                        sH = pH; sW = pH; sX = (pW - pH)/2; sY = 0;
+                    } else {
+                        sW = pW; sH = pW; sX = 0; sY = (pH - pW)/2;
+                    }
+                    ctx.drawImage(
+                        placeholderImg,
+                        sX, sY, sW, sH,
+                        centerX - radius, centerY - radius, radius*2, radius*2
+                    );
+                } else {
+                    // fallback color
+                    ctx.fillStyle = '#2b4f2b';
+                    ctx.fillRect(centerX - radius, centerY - radius, radius*2, radius*2);
+                }
+            }
+            ctx.restore();
+
+            // Draw circle border (golden accent)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = '#f5d742';
+            ctx.lineWidth = size * 0.015;
+            ctx.shadowColor = '#8b1e1e';
+            ctx.shadowBlur = 12;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // 4. TEXT: "জয় বাংলা"
+            const textString = 'জয় বাংলা';
+            const fontSize = size * 0.12;
+            ctx.font = `700 ${fontSize}px 'Hind Siliguri', 'Arial Unicode MS', 'Noto Sans Bengali', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Text position: below the photo, around 0.75 * size
+            const textY = size * 0.78;
+            
+            // Text shadow & outline for visibility
+            ctx.shadowColor = '#1e2d1e';
+            ctx.shadowBlur = 14;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 3;
+            
+            // Outline
+            ctx.strokeStyle = '#132a13';
+            ctx.lineWidth = fontSize * 0.2;
+            ctx.strokeText(textString, centerX, textY);
+            
+            // Fill with gradient (red to gold)
+            const textGrad = ctx.createLinearGradient(centerX - 100, textY-20, centerX+100, textY+20);
+            textGrad.addColorStop(0, '#f9d423');
+            textGrad.addColorStop(0.6, '#e63946');
+            textGrad.addColorStop(1, '#ffb703');
+            ctx.fillStyle = textGrad;
+            ctx.shadowColor = '#00000080';
+            ctx.shadowBlur = 16;
+            ctx.fillText(textString, centerX, textY);
+            
+            // Additional smaller subtitle (optional, but adds style)
+            ctx.font = `500 ${size * 0.045}px 'Hind Siliguri', sans-serif`;
+            ctx.fillStyle = '#f1faee';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
+            ctx.fillText('', centerX, textY + size*0.13);
+            
+            // Reset shadow
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.shadowBlur = 0;
+            
+            // Decorative tiny lines at corners (optional)
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#deb887';
+            // just for flair
+        }
+
+        // ----- redraw when size changes or image loads -----
+        function redrawCanvas() {
+            if (userImage && !userImage.complete) {
+                // image still loading, wait for onload
+                return;
+            }
+            drawCard();
+        }
+
+        // ----- handle file upload -----
+        fileInput.addEventListener('change', function(e) {
+            const file = fileInput.files[0];
+            if (!file) {
+                fileNameDisplay.textContent = 'কোনো ফাইল নয়';
+                return;
+            }
+            
+            fileNameDisplay.textContent = file.name.length > 20 ? file.name.substring(0, 18)+'…' : file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = new Image();
+                img.onload = function() {
+                    userImage = img;
+                    redrawCanvas();
+                    // Revoke placeholder? not needed
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // ----- size slider -----
+        function updateSize() {
+            currentSize = parseInt(sizeSlider.value, 10);
+            sizeValue.textContent = currentSize + ' px';
+            redrawCanvas();
+        }
+        
+        sizeSlider.addEventListener('input', updateSize);
+
+        // ----- download feature -----
+        downloadBtn.addEventListener('click', function() {
+            // Ensure canvas is up to date
+            redrawCanvas();
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `joybangla_photocard_${currentSize}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        // ----- ensure canvas draws when placeholder loads first -----
+        // Also redraw if window resizes? Not needed, canvas is fixed size.
+        
+        // Initialize drawing (placeholder already loading, but we call redrawCanvas)
+        // If placeholder already loaded, draw; else wait.
+        if (placeholderImg.complete) {
+            redrawCanvas();
+        } else {
+            placeholderImg.onload = () => {
+                if (!userImage) redrawCanvas();
+            };
+        }
+        
+        // If userImage not set, placeholder used.
+        // Edge: if user uploads before placeholder loads, fine.
+        
+        // Additional: make sure any image load triggers redraw
+        // Already done in reader.onload
+        
+        // For safety, call redrawCanvas after small delay to catch any pending
+        window.addEventListener('load', () => {
+            redrawCanvas();
+        });
+
+        // Update size display on load
+        sizeValue.textContent = currentSize + ' px';
+        
+        // Also, if user clicks on download but no image, it's fine with placeholder.
+        // Provide a nice touch: if user hasn't uploaded, still can download with placeholder.
+        
+        // clean up object url on unload (optional)
+        window.addEventListener('beforeunload', () => {
+            if (placeholderURL) URL.revokeObjectURL(placeholderURL);
+        });
+        
+    })();
+</script>
+</body>
+</html>
